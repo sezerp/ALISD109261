@@ -220,7 +220,7 @@ static
 **/private*.ipynb
 **/Untitled*.ipynb
 
-**/.ipynb_checkpoints/
+**/.ipynb_checkpoints
 
 # data files
 
