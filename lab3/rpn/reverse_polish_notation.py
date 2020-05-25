@@ -1,5 +1,6 @@
 from lab3.rpn.grammar.Lexer import SimpleMathGrammar, TokenKind, Operand0
-import queue
+from collections import deque
+from typing import List
 
 
 class Step:
@@ -21,9 +22,10 @@ class ReversePolishNotation:
     def __init__(self, expresion: str):
         self.expresion = expresion
 
-    def convert(self) -> str:
+    def convert(self, explain=False) -> str:
         """Convert `self.expresion` into expresion
             Do not support unary operations
+            :param explain: boolean set to tru to see in output explain each step
             Returns:
                 :return: str
             Raises:
@@ -31,22 +33,23 @@ class ReversePolishNotation:
         """
         smg = SimpleMathGrammar()
         stack = []
-        que = queue.Queue()
+        que = deque()
+        step = 1
         for t in smg.tokenize(self.expresion):
             if t.type == TokenKind.NUMBER:
                 if stack and stack[-1].type == TokenKind.OP:
-                    que.put(t)
+                    que.append(t)
                     operator = stack.pop()
-                    que.put(operator)
+                    que.append(operator)
                 else:
-                    que.put(t)
+                    que.append(t)
             elif t.type == TokenKind.SEPARATOR and t.value in self.LEFT_P:
                 stack.append(t)
             elif t.type == TokenKind.SEPARATOR and t.value in self.RIGHT_P:
                 # pop last operator from stack as long as rich open parenthesis
                 if stack and stack[-1].value not in self.LEFT_P:
                     operator = stack.pop()
-                    que.put(operator)
+                    que.append(operator)
                 # remove from stack open parenthesis
                 stack.pop()
             elif t.type == TokenKind.OP:
@@ -56,35 +59,52 @@ class ReversePolishNotation:
                     stack.append(t)
                 elif stack and (o1.precedence < o2.precedence or o1.precedence == o2.precedence):
                     o = stack.pop()
-                    que.put(o)
+                    que.append(o)
                     stack.append(t)
-            # self._explain_step(que, stack)
+            if explain:
+                print(f'step: {step} => {self._explain_step(que, stack)}')
+                step += 1
 
         # moving
         for t in stack:
             if t.type not in TokenKind.SEPARATOR:
-                que.put(t)
+                que.append(t)
+                if explain:
+                    print(f'step: {step} => {self._explain_step(que, stack)}')
+                    step += 1
 
         return self._que_expresion_to_string(que)
 
     def explain(self) -> str:
-        """Print all steps
+        """Print all steps as values stored in que and stack
             Returns:
                 :return: explanation as string
             Raises:
                  ValueError: If `self.expresion` is not valid math expresion.
         """
-        raise NotImplementedError()
 
-    def _explain_step(self, que, stack) -> str:
-        return f' queue: {self._que_expresion_to_string(que)} stack: {stack}'
+        return self.convert(explain=True)
 
-    def _que_expresion_to_string(self, q: queue.Queue):
+    def _explain_step(self, que: deque, stack: List) -> str:
+        que_values = '['
+        stack_values = '['
+
+        for t in que:
+            que_values += t.value + ' '
+        que_values += ']'
+
+        for t in stack:
+            stack_values += f'"{t.value}"' + ', '
+        stack_values += ']'
+
+        return f' queue: {que_values} stack: {stack_values}'
+
+    def _que_expresion_to_string(self, q: deque):
         result = ''
 
-        result += f'{q.get().value}'
-        for e in range(0, q.qsize()):
+        result += f'{q.popleft().value}'
+        for e in q:
             result += self._EXPLAIN_DELIMITER
-            result += f'{q.get().value}'
+            result += f'{e.value}'
 
         return result

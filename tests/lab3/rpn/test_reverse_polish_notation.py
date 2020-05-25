@@ -44,9 +44,9 @@ class TestReversePolishNotation(unittest.TestCase):
 
     def test_convert__expresion_with_nested_parentheses(self):
         # given
-        expresion = ' (4-(2 + 12)*(2+3)-5'
+        expresion = '(4-(2 + 12))*(2+3)-5'
         # when
-        result = ReversePolishNotation(expresion).convert()
+        result = ReversePolishNotation(expresion).convert(True)
         # then
         expected = '4 2 12 + - 2 3 + * 5 -'
         self.assertEqual(expected, result)
