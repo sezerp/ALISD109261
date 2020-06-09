@@ -2,7 +2,7 @@
 
 1. Create virtual environment by typing in terminal:
     ```shell script 
-    python3 -m venv venv
+    py -m venv venv
     ```
 
 2. Activate environment in terminal session
