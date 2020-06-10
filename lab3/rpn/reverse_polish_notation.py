@@ -25,7 +25,7 @@ class ReversePolishNotation:
     def convert(self, explain=False) -> str:
         """Convert `self.expresion` into expresion
             Do not support unary operations
-            :param explain: boolean set to tru to see in output explain each step
+            :param explain: boolean set to true to see in output explain each step
             Returns:
                 :return: str
             Raises:
@@ -46,7 +46,7 @@ class ReversePolishNotation:
             elif t.type == TokenKind.SEPARATOR and t.value in self.LEFT_P:
                 stack.append(t)
             elif t.type == TokenKind.SEPARATOR and t.value in self.RIGHT_P:
-                # pop last operator from stack as long as rich open parenthesis
+                # pop last operator from stack as long as not rich open parenthesis
                 if stack and stack[-1].value not in self.LEFT_P:
                     operator = stack.pop()
                     que.append(operator)
