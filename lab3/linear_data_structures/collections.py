@@ -27,7 +27,7 @@ class List(Generic[T]):
     def pop_back(self) -> T:
         raise NotImplementedError
 
-    def get(self, index: int) -> T:
+    def pop_element(self, e: T) -> T:
         raise NotImplementedError
 
     def get_at_index(self, e: T) -> Node:
