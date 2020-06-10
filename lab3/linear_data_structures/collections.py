@@ -6,6 +6,7 @@ T = TypeVar('T')
 class Node(Generic[T]):
     def __init__(self, value: T):
         self.next: Node[T] = None
+        self.previous: Node[T] = None
         self.value: T = value
 
 
@@ -30,11 +31,5 @@ class List(Generic[T]):
     def pop_element(self, e: T) -> T:
         raise NotImplementedError
 
-    def get_at_index(self, e: T) -> Node:
-        raise NotImplementedError
-
-    def find(self, e: T) -> Node:
-        raise NotImplementedError
-
     def is_empty(self) -> bool:
-        return self.size == 0
+        return self.size == 0 and self.head is None
