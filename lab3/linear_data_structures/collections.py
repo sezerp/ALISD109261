@@ -33,3 +33,48 @@ class List(Generic[T]):
 
     def is_empty(self) -> bool:
         return self.size == 0 and self.head is None
+
+
+class ComparableNode(Generic[T]):
+    def __init__(self, value: T):
+        self.next: ComparableNode[T] = None
+        self.previous: ComparableNode[T] = None
+        self.value: T = value
+
+    def __eq__(self, other: 'ComparableNode[T]') -> bool:
+        if other is None:
+            return False
+        return self.value == other.value
+
+    def __ne__(self, other):
+        if other is None:
+            return True
+        return self.value != other.value
+
+    def __gt__(self, other: 'ComparableNode[T]'):
+        return self.value > other.value
+
+    def __ge__(self, other: 'ComparableNode[T]'):
+        return self.value >= other.value
+
+    def __lt__(self, other: 'ComparableNode[T]'):
+        return self.value < other.value
+
+    def __le__(self, other: 'ComparableNode[T]'):
+        return self.value <= other.value
+
+
+class SortedList(Generic[T]):
+    def __init__(self):
+        self.head: ComparableNode[T] = None
+        self.tail: ComparableNode[T] = None
+        self.size: int = 0
+
+    def insert(self, e: T):
+        raise NotImplementedError
+
+    def delete(self, e: T):
+        raise NotImplementedError
+
+    def is_empty(self) -> bool:
+        return self.head is None

@@ -181,5 +181,6 @@ class TestDoubleLinkedList(unittest.TestCase):
         self.assertEqual(5, xs.tail.previous.value)
         self.assertEqual(1, xs.head.next.value)
 
+
 if __name__ == '__main__':
     unittest.main()
