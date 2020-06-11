@@ -6,6 +6,59 @@
 \usepackage{listings}
 \usepackage{hyperref}
 
+\mathchardef\hyphenmathcode=\mathcode`\-
+
+\lstset{language=python, literate={-}{-}1}
+
+\let\origlstlisting=\lstlisting
+\let\endoriglstlisting=\endlstlisting
+\renewenvironment{lstlisting}
+    {\mathcode`\-=\hyphenmathcode
+     \everymath{}\mathsurround=0pt\origlstlisting}
+    {\endoriglstlisting}
+
+% Default fixed font does not support bold face
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{12} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{12}  % for normal
+
+% Custom colors
+\usepackage{color}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+
+\usepackage{listings}
+
+% Python style for highlighting
+\newcommand\pythonstyle{\lstset{
+language=Python,
+basicstyle=\ttm,
+otherkeywords={self},             % Add keywords here
+keywordstyle=\ttb\color{deepblue},
+emph={MyClass,__init__},          % Custom highlighting
+emphstyle=\ttb\color{deepred},    % Custom highlighting style
+stringstyle=\color{deepgreen},
+frame=tb,                         % Any extra options here
+showstringspaces=false            % 
+}}
+
+
+% Python environment
+\lstnewenvironment{python}[1][]
+{
+\pythonstyle
+\lstset{#1}
+}
+{}
+
+% Python for external files
+\newcommand\pythonexternal[2][]{{
+\pythonstyle
+\lstinputlisting[#1]{#2}}}
+
+% Python for inline
+\newcommand\pythoninline[1]{{\pythonstyle\lstinline!#1!}}
+
 
 \title{Algorytmy i struktury danych laboratorium 3\\Stos metody push i pop}
 
@@ -16,31 +69,240 @@
 
 \maketitle
 
+\section*{Definicje}
+
+Definicja elementu listy
+\begin{python}
+class Node(Generic[T]):
+    def __init__(self, value: T):
+        self.next: Node[T] = None
+        self.previous: Node[T] = None
+        self.value: T = value
+\end{python}
+
+\begin{python}
+class List(Generic[T]):
+    def __init__(self):
+        self.head: Node[T] = None
+        self.tail: Node[T] = None
+        self.size: int = 0
+        
+    def is_empty(self):
+        return self.head is None
+\end{python}
+
 
 \section*{Metody push}
 
 
-Metoda  dodaje element na pocz¹tek listy 
+Metoda dodaje element na pocz¹tek listy
+
+\begin{python}[caption=push\_front() lista jedno kierunkowa]
+def push_front(xs, e: T):
+    node = Node[T](e)
+    xs.size += 1
+    if xs.head is None:
+        xs.head = node
+        xs.tail = node
+    else:
+        node.next = xs.head
+        xs.head = node
+\end{python}
 
 
-\lstset{language=python}
-\begin{lstlisting}[caption=push\_front()]
-def push_front(list: List):
-	pass
-\end{lstlisting}
+
+\begin{python}[caption=push\_front() lista dwukierunkowa kierunkowa]
+def push_front(xs: List[T], e: T):
+    node = Node[T](e)
+    xs.size += 1
+    if xs.head is None:
+        xs.head = node
+        xs.tail = node
+    else:
+        xs.head.previous = node
+        node.next = xs.head
+        xs.head = node
+\end{python}
 
 
-Metoda push\_back \- dodaje element na koniec listy
+\begin{python}[caption=push\_back() lista jednokierunkowa kierunkowa]
+def push_back(xs: List[T], e: T):
+    node = Node[T](e)
+    xs.size += 1
+    if xs.head is None:
+        xs.head = node
+        xs.tail = node
+    else:
+        xs.tail.next = node
+        xs.tail = node
+\end{python}
+
+
+\begin{python}[caption=push\_back() lista dwukierunkowa kierunkowa]
+def push_back(xs: List[T], e: T):
+    node = Node[T](e)
+    xs.size += 1
+    if xs.head is None:
+        xs.head = node
+        xs.tail = node
+    else:
+        node.previous = xs.tail
+        xs.tail.next = node
+        xs.tail = node
+\end{python}
 
 
 
-\begin{lstlisting}[caption=push\_back()]
-def push_back(list: List):
-	pass
-\end{lstlisting}
+\section*{Metody pop}
+
+Metody pop - usuwaj¹ce element list
+\lstset{basicstyle=\ttfamily}
+\begin{python}[caption=pop\_front() lista jedno kierunkowa]
+def pop_front(xs: List[T]):
+    node = None
+    if xs.is_empty():
+        raise IndexError
+    elif xs.size == 1:
+        xs.size -= 1
+        node = xs.head
+        xs.head = None
+        xs.tail = None
+    else:
+        xs.size -= 1
+        node = xs.head
+        xs.head = xs.head.next
+        
+    return node.value
+\end{python}
 
 
-Przykadowa implementacja \url{https://github.com/sezerp/ALISD109261/blob/feature/lab3/lab3/linear_data_structures/linked_list.py}
+\begin{python}[caption=pop\_front() lista dwukierunkowa kierunkowa]
+def pop_front(xs: List[T]):
+    node = None
+    if xs.is_empty():
+        raise IndexError
+    elif xs.size == 1:
+        xs.size -= 1
+        node = xs.head
+        xs.head = None
+        xs.tail = None
+    else:
+        xs.size -= 1
+        node = xs.head
+        xs.head = xs.head.next
+        xs.head.previous = None
+
+    return node.value
+\end{python}
+
+
+\begin{python}[caption=pop\_back() lista jednokierunkowa kierunkowa]
+def pop_back(xs: List[T]):
+    node_result = None
+    if xs.is_empty():
+        raise IndexError
+    elif xs.size == 1:
+        xs.size -= 1
+        node_result = xs.head
+        xs.head = None
+        xs.tail = None
+    else:
+        node = xs.head
+        while node.next != xs.tail:
+            node = node.next
+            
+        node_result = node.next
+        xs.tail = node
+        xs.tail.next = None
+        xs.size -= 1
+        
+        return node_result.value
+\end{python}
+
+
+\begin{python}[caption=pop\_back() lista dwukierunkowa kierunkowa]
+def pop_back(xs: List[T]):
+    node = None
+    if xs.is_empty():
+        raise IndexError
+    elif xs.size == 1:
+        node = xs.head
+        xs.head = None
+        xs.tail = None
+    else:
+        node = xs.tail
+        xs.tail = node.previous
+        xs.tail.next = None
+    xs.size -= 1
+    
+    return node.value
+\end{python}
+
+
+\begin{python}[caption=pop\_1() lista jedno kierunkowa]
+    def pop_1()(xs: List[T], e: T):
+        if xs.is_empty():
+            raise IndexError
+
+        result = None
+        node = xs.head
+        if xs.head.value == e:
+            result = xs.head
+            xs.head = xs.head.next
+            xs.size -= 1
+        else:
+            while node.next and node.next.value != e:
+                node = node.next
+
+            if node.next.value == e:
+                result = node.next
+                xs.size -= 1
+                if node.next.next is not None:
+                    node.next = node.next.next
+                else:
+                    xs.tail = node
+                    node.next = None
+            else:
+                result = None
+
+        return result.value if result else None
+\end{python}
+
+\begin{python}[caption=pop\_2() lista dwukierunkowa]
+    def pop_2(xs: List[T], e: T):
+
+        if xs.is_empty():
+            raise IndexError
+
+        result = None
+        node = xs.head
+        if node.value == e:
+            result = xs.head
+            xs.head = None
+            xs.tail = None
+            xs.size -= 1
+        else:
+            while node.next and node.next.value != e:
+                node = node.next
+
+            if node.next.value == e:
+                result = node.next
+                xs.size -= 1
+                if node.next.next is not None:
+                    node.next = node.next.next
+                    node.next.previous = node
+                else:
+                    xs.tail = node
+                    node.next = None
+            else:
+                result = None
+\end{python}
+
+
+\section*{Podsumowanie}
+
+
+Przykadowa implementacja list dwukierunkowej wraz z jednokierunkow¹ \href{https://github.com/sezerp/ALISD109261/tree/feature/lab3/lab3/linear_data_structures}{GitHub}
 
 
 
