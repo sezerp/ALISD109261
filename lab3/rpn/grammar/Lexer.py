@@ -172,10 +172,10 @@ class SimpleMathGrammar(MathGrammar):
         '^': LeftRightAssociativity(),
     }
 
-    PARENTHESIS = {'(', ')', '[', ']'}
+    PARENTHESIS = {'(', ')', '[', ']', '{', '}'}
     TOKEN_SPECIFICATION = [
         (TokenKind.NUMBER, r'\d+(\.\d*)?'),  # Integer or decimal number
-        (TokenKind.SEPARATOR, r'[()\[\]]'),  # Identifiers
+        (TokenKind.SEPARATOR, r'[()\[\]\{\}]'),  # Identifiers
         (TokenKind.OP, r'[+\-*/^]'),  # Arithmetic operators
         (TokenKind.NEWLINE, r'\n'),  # Line endings
         (TokenKind.SKIP, r'[ \t]+'),  # Skip over spaces and tabs
