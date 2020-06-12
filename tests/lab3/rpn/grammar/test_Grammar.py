@@ -59,9 +59,9 @@ class TestSimpleMathGrammar(unittest.TestCase):
         result = list(SimpleMathGrammar().tokenize(expresion))
         # then
         expected = [
-            Token(TokenKind.NUMBER, '1', 1, 0),
+            Token(TokenKind.OPERAND, '1', 1, 0),
             Token(TokenKind.OP, '+', 1, 2),
-            Token(TokenKind.NUMBER, '2', 1, 3)
+            Token(TokenKind.OPERAND, '2', 1, 3)
         ]
 
         self.assertEqual(expected, result)
@@ -75,11 +75,11 @@ class TestSimpleMathGrammar(unittest.TestCase):
         result = list(SimpleMathGrammar().tokenize(expresion))
         # then
         expected = [
-            Token(type=TokenKind.NUMBER, value='1', line=1, column=0),
+            Token(type=TokenKind.OPERAND, value='1', line=1, column=0),
             Token(type=TokenKind.OP, value='+', line=1, column=2),
-            Token(type=TokenKind.NUMBER, value='3', line=1, column=4),
+            Token(type=TokenKind.OPERAND, value='3', line=1, column=4),
             Token(type=TokenKind.OP, value='-', line=2, column=8),
-            Token(type=TokenKind.NUMBER, value='3', line=2, column=10)
+            Token(type=TokenKind.OPERAND, value='3', line=2, column=10)
         ]
         self.assertEqual(expected, result)
 
@@ -92,32 +92,32 @@ class TestSimpleMathGrammar(unittest.TestCase):
         expected = [
              Token(type=TokenKind.SEPARATOR, value='[', line=1, column=0),
              Token(type=TokenKind.SEPARATOR, value='(', line=1, column=1),
-             Token(type=TokenKind.NUMBER, value='9', line=1, column=2),
+             Token(type=TokenKind.OPERAND, value='9', line=1, column=2),
              Token(type=TokenKind.OP, value='-', line=1, column=3),
-             Token(type=TokenKind.NUMBER, value='2', line=1, column=4),
+             Token(type=TokenKind.OPERAND, value='2', line=1, column=4),
              Token(type=TokenKind.SEPARATOR, value=')', line=1, column=5),
              Token(type=TokenKind.OP, value='*', line=1, column=6),
-             Token(type=TokenKind.NUMBER, value='3', line=1, column=7),
+             Token(type=TokenKind.OPERAND, value='3', line=1, column=7),
              Token(type=TokenKind.OP, value='-', line=1, column=8),
              Token(type=TokenKind.SEPARATOR, value='(', line=1, column=9),
-             Token(type=TokenKind.NUMBER, value='9', line=1, column=10),
+             Token(type=TokenKind.OPERAND, value='9', line=1, column=10),
              Token(type=TokenKind.OP, value='-', line=1, column=11),
-             Token(type=TokenKind.NUMBER, value='3', line=1, column=12),
+             Token(type=TokenKind.OPERAND, value='3', line=1, column=12),
              Token(type=TokenKind.SEPARATOR, value=')', line=1, column=13),
              Token(type=TokenKind.OP, value='^', line=1, column=14),
-             Token(type=TokenKind.NUMBER, value='2', line=1, column=15),
+             Token(type=TokenKind.OPERAND, value='2', line=1, column=15),
              Token(type=TokenKind.OP, value='/', line=1, column=16),
              Token(type=TokenKind.SEPARATOR, value='(', line=1, column=17),
-             Token(type=TokenKind.NUMBER, value='2', line=1, column=18),
+             Token(type=TokenKind.OPERAND, value='2', line=1, column=18),
              Token(type=TokenKind.OP, value='*', line=1, column=19),
-             Token(type=TokenKind.NUMBER, value='3', line=1, column=20),
+             Token(type=TokenKind.OPERAND, value='3', line=1, column=20),
              Token(type=TokenKind.SEPARATOR, value=')', line=1, column=21),
              Token(type=TokenKind.SEPARATOR, value=']', line=1, column=22),
              Token(type=TokenKind.OP, value='*', line=1, column=23),
              Token(type=TokenKind.SEPARATOR, value='(', line=1, column=24),
-             Token(type=TokenKind.NUMBER, value='6', line=1, column=25),
+             Token(type=TokenKind.OPERAND, value='6', line=1, column=25),
              Token(type=TokenKind.OP, value='-', line=1, column=26),
-             Token(type=TokenKind.NUMBER, value='4', line=1, column=27),
+             Token(type=TokenKind.OPERAND, value='4', line=1, column=27),
              Token(type=TokenKind.SEPARATOR, value=')', line=1, column=28)
         ]
         self.assertEqual(expected, result)

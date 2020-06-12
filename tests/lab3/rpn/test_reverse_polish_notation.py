@@ -53,11 +53,37 @@ class TestReversePolishNotation(unittest.TestCase):
 
     def test_convert_complex_expresion_with_nested_parentheses(self):
         # given
-        expresion = '[(9-2)*3-(9-3)^2/(2*3)]*(6-4)'
+        expresion = '[(9 - 2) * 3 - (9 - 3)^2 / (2 * 3)] * (6 - 4)'
         # when
         result = ReversePolishNotation(expresion).convert()
         # then
-        expected = '9 2 - 3 * 9 3 - 2 ^ 2 3 * / 6 4 - *'
+        expected = '9 2 - 3 * 9 3 - 2 ^ 2 3 * / - 6 4 - *'
+        self.assertEqual(expected, result)
+
+    def test_calculate_simple_expresion(self):
+        # given
+        expresion = '1 - 2 - 3'
+        # when
+        result = ReversePolishNotation(expresion).calculate()
+        # then
+        self.assertEqual(-4, result)
+
+    def test_calculate_complex_expresion_with_nested_parentheses(self):
+        # given
+        expresion = '[ (9 - 2) * 3 - (9 - 3) ^ 2 / (2 * 3)] * (6 - 4)'
+        # when
+        result = ReversePolishNotation(expresion).calculate()
+        # then
+        expected = 30.
+        self.assertEqual(expected, result)
+
+    def test_calculate_complex_expresion_with_nested_and_curly_parentheses(self):
+        # given
+        expresion = '{[(9-7)+(2+3)]-(7-4)}*[(7-5)*3-2]'
+        # when
+        result = ReversePolishNotation(expresion).calculate()
+        # then
+        expected = 16.
         self.assertEqual(expected, result)
 
 

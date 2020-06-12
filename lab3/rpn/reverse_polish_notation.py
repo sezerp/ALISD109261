@@ -1,4 +1,4 @@
-from lab3.rpn.grammar.Lexer import SimpleMathGrammar, TokenKind, Operand0
+from lab3.rpn.grammar.Lexer import SimpleMathGrammar, TokenKind, Operand0, Token
 from collections import deque
 from typing import List
 
@@ -36,7 +36,7 @@ class ReversePolishNotation:
         que = deque()
         step = 1
         for t in smg.tokenize(self.expresion):
-            if t.type == TokenKind.NUMBER:
+            if t.type == TokenKind.OPERAND:
                 if stack and stack[-1].type == TokenKind.OP:
                     que.append(t)
                     operator = stack.pop()
@@ -47,14 +47,14 @@ class ReversePolishNotation:
                 stack.append(t)
             elif t.type == TokenKind.SEPARATOR and t.value in self.RIGHT_P:
                 # pop last operator from stack as long as not rich open parenthesis
-                if stack and stack[-1].value not in self.LEFT_P:
+                while stack and stack[-1].value not in self.LEFT_P:
                     operator = stack.pop()
                     que.append(operator)
                 # remove from stack open parenthesis
                 stack.pop()
             elif t.type == TokenKind.OP:
-                o1 = SimpleMathGrammar.token_to_operand(t)
-                o2 = SimpleMathGrammar.token_to_operand(stack[-1]) if stack and stack[-1].type == TokenKind.OP else Operand0()
+                o1 = SimpleMathGrammar.token_to_operator(t)
+                o2 = SimpleMathGrammar.token_to_operator(stack[-1]) if stack and stack[-1].type == TokenKind.OP else Operand0()
                 if o1.precedence > o2.precedence:
                     stack.append(t)
                 elif stack and (o1.precedence < o2.precedence or o1.precedence == o2.precedence):
@@ -73,7 +73,38 @@ class ReversePolishNotation:
                     print(f'step: {step} => {self._explain_step(que, stack)}')
                     step += 1
 
-        return self._que_expresion_to_string(que)
+        return self._que_mk_string(que)
+
+    def calculate(self, explain = False) -> float:
+        """
+        Calculate given algebraic expresion
+        :param explain: if set to `True` then will print step by stem explanation
+        :return: result after calculation expresion
+        """
+
+        stc = []
+        rpn_exp = self.convert(explain)
+        smg = SimpleMathGrammar()
+        step = 1
+        print(rpn_exp)
+        for t in smg.tokenize(rpn_exp):
+            if t.type == TokenKind.OPERAND:
+                stc.append(t.value)
+                if explain:
+                    print(f'step: {step} stack: {stc}, v: {t.value}')
+                    step += 1
+            elif t.type == TokenKind.OP:
+                operator = SimpleMathGrammar.token_to_operator(t)
+                operands = []
+                for _ in range(operator.number_arguments):
+                    operand = float(stc.pop())
+                    operands.append(operand)
+                sub_result = operator.apply(operands)
+                stc.append(sub_result)
+                if explain:
+                    print(f'step: {step} stack: {stc} operator: {t.value} operands{operands} sub_result: {sub_result}')
+                    step += 1
+        return stc.pop()
 
     def explain(self) -> str:
         """Print all steps as values stored in que and stack
@@ -85,7 +116,8 @@ class ReversePolishNotation:
 
         return self.convert(explain=True)
 
-    def _explain_step(self, que: deque, stack: List) -> str:
+    @staticmethod
+    def _explain_step(que: deque, stack: List) -> str:
         que_values = '['
         stack_values = '['
 
@@ -99,7 +131,7 @@ class ReversePolishNotation:
 
         return f' queue: {que_values} stack: {stack_values}'
 
-    def _que_expresion_to_string(self, q: deque):
+    def _que_mk_string(self, q: deque):
         result = ''
 
         result += f'{q.popleft().value}'
