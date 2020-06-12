@@ -226,3 +226,9 @@ static
 
 **/*.csv
 **/*.p
+
+*/*.aux
+*/*.div
+*/*.log
+*/*.out
+*/*.gz
