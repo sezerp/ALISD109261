@@ -107,11 +107,11 @@ class Precedence:
     def __gt__(self, other: 'Precedence'):
         return self.precedence_number > other.precedence_number
 
-    def __lt__(self, other: 'Precedence'):
-        return self.precedence_number < other.precedence_number
-
     def __ge__(self, other: 'Precedence'):
         return self.precedence_number >= other.precedence_number
+
+    def __lt__(self, other: 'Precedence'):
+        return self.precedence_number < other.precedence_number
 
     def __le__(self, other: 'Precedence'):
         return self.precedence_number <= other.precedence_number
@@ -266,8 +266,8 @@ class SimpleMathGrammar(MathGrammar):
         """
         if op.type != TokenKind.OP:
             raise ValueError(f'The op must be Token of operand type')
-
-        return cls.OPERANDS_TO_PRECEDENCE[op.value]
+        result = cls.OPERANDS_TO_PRECEDENCE[op.value]
+        return result
 
     @classmethod
     def get_operand_associativity(cls, op: Token) -> Associativity:

@@ -3,10 +3,118 @@ from collections import deque
 from typing import List
 
 
-class Step:
+class RPNExplanator:
+
+    _step = 'Step'
+    _input = 'Input'
+    _operation = 'Operation'
+    _stack = 'Stack'
 
     def __init__(self):
-        pass
+        self.step = 0
+        self.columns = {
+            self._step: {
+                'width': len(self._step) + 2,
+                'column': []
+            },
+            self._input: {
+                'width': len(self._input) + 2,
+                'column': []
+            },
+            self._operation: {
+                'width': len(self._input) + 2,
+                'column': []
+            },
+            self._stack: {
+                'width': len(self._input) + 2,
+                'column': []
+            }
+        }
+
+    def add(self, queue, stack: List[Token], op='-'):
+        self._update_step_col(self.step)
+        self._update_input_col(queue)
+        self._update_stack_col(stack)
+        self._update_operation_col(op)
+
+    def __str__(self):
+        offset = 1
+        st_w = self.columns[self._step]['width']
+        in_w = self.columns[self._input]['width']
+        stc_w = self.columns[self._stack]['width']
+        op_w = self.columns[self._operation]['width']
+        result = ''
+        for (k, v) in self.columns.items():
+            w = v['width']
+            col_title = k + (' ' * (w - len(k)))
+            result += f'|{col_title}'
+        result += '\n'
+        result += '-' * (st_w + in_w + stc_w + op_w)
+        result += '\n'
+        for i in range(self.step):
+            st_s = f"{self.columns[self._step]['column'][i]}" + (' ' * (st_w - len(f"{self.columns[self._step]['column'][i]}") + offset))
+            in_s = f"{self.columns[self._input]['column'][i]}" + (' ' * (in_w - len(f"{self.columns[self._input]['column'][i]}") + offset))
+            stc_s = f"{self.columns[self._stack]['column'][i]}" + (' ' * (stc_w - len(f"{self.columns[self._stack]['column'][i]}") + offset))
+            op_s = f"{self.columns[self._operation]['column'][i]}" + (' ' * (op_w - len(f"{self.columns[self._operation]['column'][i]}")))
+            result += f'{st_s}|{in_s}|{stc_s}|{op_s}\n'
+
+        return result
+
+    def _update_step_col(self, step):
+        self.step += 1
+        if len(f'{step}') > len(f'{step - 1}'):
+            self.columns[self._step]['width'] = len(f'{step}')
+
+        self.columns[self._step]['column'].append(f'{step}')
+
+    def _update_input_col(self, input_d):
+        actual_w = self.columns[self._stack]['width']
+        if len(self._mk_string_queue(input_d)) > actual_w:
+            self.columns[self._input]['width'] = len(self._mk_string_queue(input_d)) + 2
+
+        self.columns[self._input]['column'].append(self._mk_string_queue(input_d))
+
+    def _update_stack_col(self, stack):
+        actual_w = self.columns[self._stack]['width']
+        if len(self._mk_string_stack(stack)) > actual_w:
+            self.columns[self._stack]['width'] = len(self._mk_string_stack(stack))
+
+        self.columns[self._stack]['column'].append(self._mk_string_queue(stack))
+
+    def _update_operation_col(self, op='-'):
+        actual_w = self.columns[self._operation]['width']
+        if len(f'{op}') > actual_w:
+            self.columns[self._operation]['width'] = len(f'{op}')
+
+        self.columns[self._operation]['column'].append(f'{op}')
+
+    @staticmethod
+    def _mk_string_stack(iterable: List[Token]) -> str:
+        if len(iterable) == 0:
+            return '[Empty]'
+        new_iterable = iterable.copy()
+        new_iterable.reverse()
+        result = ''
+        for e in new_iterable:
+            try:
+                result += f', {e.value}'
+            except AttributeError:
+                result += f', {e}'
+
+        return result
+
+    @staticmethod
+    def _mk_string_queue(iterable: deque) -> str:
+        if len(iterable) == 0:
+            return '[Empty]'
+        result = ''
+        for e in iterable:
+            try:
+                result += f', {e.value}'
+            except AttributeError:
+                result += f', {e}'
+
+        return result
 
 
 class ReversePolishNotation:
@@ -31,18 +139,13 @@ class ReversePolishNotation:
             Raises:
                  ValueError: If `self.expresion` is not valid math expresion.
         """
+        step_recorder = RPNExplanator()
         smg = SimpleMathGrammar()
         stack = []
         que = deque()
-        step = 1
         for t in smg.tokenize(self.expresion):
             if t.type == TokenKind.OPERAND:
-                if stack and stack[-1].type == TokenKind.OP:
-                    que.append(t)
-                    operator = stack.pop()
-                    que.append(operator)
-                else:
-                    que.append(t)
+                que.append(t)
             elif t.type == TokenKind.SEPARATOR and t.value in self.LEFT_P:
                 stack.append(t)
             elif t.type == TokenKind.SEPARATOR and t.value in self.RIGHT_P:
@@ -55,27 +158,28 @@ class ReversePolishNotation:
             elif t.type == TokenKind.OP:
                 o1 = SimpleMathGrammar.token_to_operator(t)
                 o2 = SimpleMathGrammar.token_to_operator(stack[-1]) if stack and stack[-1].type == TokenKind.OP else Operand0()
-                if o1.precedence > o2.precedence:
-                    stack.append(t)
-                elif stack and (o1.precedence < o2.precedence or o1.precedence == o2.precedence):
+                while stack and o1.precedence <= o2.precedence:
                     o = stack.pop()
                     que.append(o)
-                    stack.append(t)
-            if explain:
-                print(f'step: {step} => {self._explain_step(que, stack)}')
-                step += 1
+                    o2 = SimpleMathGrammar.token_to_operator(stack[-1]) if stack and stack[-1].type == TokenKind.OP else Operand0()
+                stack.append(t)
 
-        # moving
-        for t in stack:
+            if explain:
+                step_recorder.add(que, stack)
+
+        while stack:
+            t = stack.pop()
             if t.type not in TokenKind.SEPARATOR:
                 que.append(t)
                 if explain:
-                    print(f'step: {step} => {self._explain_step(que, stack)}')
-                    step += 1
+                    step_recorder.add(que, stack)
+
+        if explain:
+            print(step_recorder)
 
         return self._que_mk_string(que)
 
-    def calculate(self, explain = False) -> float:
+    def calculate(self, explain=False) -> float:
         """
         Calculate given algebraic expresion
         :param explain: if set to `True` then will print step by stem explanation
@@ -84,15 +188,13 @@ class ReversePolishNotation:
 
         stc = []
         rpn_exp = self.convert(explain)
+        step_recorder = RPNExplanator()
         smg = SimpleMathGrammar()
-        step = 1
-        print(rpn_exp)
         for t in smg.tokenize(rpn_exp):
             if t.type == TokenKind.OPERAND:
                 stc.append(t.value)
                 if explain:
-                    print(f'step: {step} stack: {stc}, v: {t.value}')
-                    step += 1
+                    step_recorder.add([], stc)
             elif t.type == TokenKind.OP:
                 operator = SimpleMathGrammar.token_to_operator(t)
                 operands = []
@@ -102,8 +204,10 @@ class ReversePolishNotation:
                 sub_result = operator.apply(operands)
                 stc.append(sub_result)
                 if explain:
-                    print(f'step: {step} stack: {stc} operator: {t.value} operands{operands} sub_result: {sub_result}')
-                    step += 1
+                    step_recorder.add(['[Empty]'], stc)
+        if explain:
+            print(step_recorder)
+
         return stc.pop()
 
     def explain(self) -> str:
@@ -116,22 +220,9 @@ class ReversePolishNotation:
 
         return self.convert(explain=True)
 
-    @staticmethod
-    def _explain_step(que: deque, stack: List) -> str:
-        que_values = '['
-        stack_values = '['
-
-        for t in que:
-            que_values += t.value + ' '
-        que_values += ']'
-
-        for t in stack:
-            stack_values += f'"{t.value}"' + ', '
-        stack_values += ']'
-
-        return f' queue: {que_values} stack: {stack_values}'
-
     def _que_mk_string(self, q: deque):
+        if len(q) == 0:
+            return ''
         result = ''
 
         result += f'{q.popleft().value}'

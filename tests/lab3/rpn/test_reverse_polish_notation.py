@@ -62,11 +62,19 @@ class TestReversePolishNotation(unittest.TestCase):
 
     def test_calculate_simple_expresion(self):
         # given
-        expresion = '1 - 2 - 3'
+        expresion = '3 * 8 - 6 / 3'
         # when
         result = ReversePolishNotation(expresion).calculate()
         # then
-        self.assertEqual(-4, result)
+        self.assertEqual(22., result)
+
+    def test_calculate_simple_expresion_exp(self):
+        # given
+        expresion = '3 * 8 - 6 / 3'
+        # when
+        result = ReversePolishNotation(expresion).calculate(True)
+        # then
+        self.assertEqual(22., result)
 
     def test_calculate_complex_expresion_with_nested_parentheses(self):
         # given
