@@ -1,10 +1,10 @@
-from typing import Generator
+from typing import Generator, List
 from typing import NamedTuple
 import re
 
 
 class TokenKind:
-    NUMBER = 'NUMBER'
+    OPERAND = 'NUMBER'
     NEWLINE = 'NEWLINE'
     SKIP = 'SKIP'
     MISMATCH = 'MISMATCH'
@@ -22,6 +22,15 @@ class Token(NamedTuple):
 class Associativity:
     def __init__(self):
         pass
+
+    def __str__(self) -> str:
+        return f'{self.__class__.__name__}'
+
+    def __eq__(self, other: 'Associativity') -> bool:
+        if other is None:
+            return False
+
+        return other.__str__() == self.__str__()
 
 
 class EmptyAssociativity(Associativity):
@@ -98,11 +107,11 @@ class Precedence:
     def __gt__(self, other: 'Precedence'):
         return self.precedence_number > other.precedence_number
 
-    def __lt__(self, other: 'Precedence'):
-        return self.precedence_number < other.precedence_number
-
     def __ge__(self, other: 'Precedence'):
         return self.precedence_number >= other.precedence_number
+
+    def __lt__(self, other: 'Precedence'):
+        return self.precedence_number < other.precedence_number
 
     def __le__(self, other: 'Precedence'):
         return self.precedence_number <= other.precedence_number
@@ -129,28 +138,54 @@ class Precedence3(Precedence):
 
 
 class Operand:
-    def __init__(self, precedence: Precedence, associativity: Associativity):
+    """
+    Operand is representation of algebraic statement
+    Minimal requirements for operand are:
+        - need to has identity element
+    """
+    def __init__(self, number_arguments, precedence: Precedence, associativity: Associativity, identity_element, operator):
         self.precedence = precedence
         self.associativity = associativity
+        self.e = identity_element
+        self.operator = operator
+        self.number_arguments = number_arguments
+
+    def apply(self, operands: List):
+        if self.associativity == LeftRightAssociativity():
+            return self._left_right(operands)
+        elif self.associativity == RightLeftAssociativity():
+            return self._right_left(operands)
+        else:
+            raise ValueError(f'The {self.associativity} for given operator `{self.operator}` not implemented')
+
+    def _left_right(self, operands):
+        result = self.e
+        for op in operands:
+            result = self.operator(op, result)
+        return result
+
+    def _right_left(self, operands):
+        result = self.e
+        for op in operands:
+            result = self.operator(result, op)
+        return result
 
 
 class Operand0(Operand):
     def __init__(self):
-        super().__init__(Precedence0(), EmptyAssociativity())
+        super().__init__(0, Precedence0(), EmptyAssociativity(), 0, lambda a, b: 0)
 
 
 class UnaryOperand(Operand):
     def __init__(self, token, grammar: MathGrammar):
         precedence = grammar.get_operands_precedence(token=token)
         associativity = grammar.get_operand_associativity(token=token)
-        super().__init__(precedence, associativity)
+        super().__init__(1, precedence, associativity)
 
 
 class Operand2(Operand):
-    def __init__(self, token: Token, grammar: MathGrammar):
-        priority = grammar.get_operands_precedence(token)
-        binding = grammar.get_operand_associativity(token)
-        super().__init__(priority, binding)
+    def __init__(self, priority, associativity, identity_element, operator):
+        super().__init__(2, priority, associativity, identity_element, operator)
 
 
 class SimpleMathGrammar(MathGrammar):
@@ -167,14 +202,30 @@ class SimpleMathGrammar(MathGrammar):
     OPERATOR_TO_ASSOCIATIVITY = {
         '+': LeftRightAssociativity(),
         '-': LeftRightAssociativity(),
-        '/': RightLeftAssociativity(),
-        '*': RightLeftAssociativity(),
+        '/': LeftRightAssociativity(),
+        '*': LeftRightAssociativity(),
         '^': LeftRightAssociativity(),
+    }
+
+    OPERATOR_TO_FUNCTION = {
+        '+': lambda a, b: float(a).__add__(b),
+        '-': lambda a, b: float(a).__sub__(b),
+        '/': lambda a, b: a / b,
+        '*': lambda a, b: float(a).__mul__(b),
+        '^': lambda a, b: float(a).__pow__(b),
+    }
+
+    OPERATOR_TO_IDENTITY_ELEMENT = {
+        '+': 0,
+        '-': 0,
+        '/': 1,
+        '*': 1,
+        '^': 1,
     }
 
     PARENTHESIS = {'(', ')', '[', ']', '{', '}'}
     TOKEN_SPECIFICATION = [
-        (TokenKind.NUMBER, r'\d+(\.\d*)?'),  # Integer or decimal number
+        (TokenKind.OPERAND, r'\d+(\.\d*)?'),  # Integer or decimal number
         (TokenKind.SEPARATOR, r'[()\[\]\{\}]'),  # Identifiers
         (TokenKind.OP, r'[+\-*/^]'),  # Arithmetic operators
         (TokenKind.NEWLINE, r'\n'),  # Line endings
@@ -211,18 +262,30 @@ class SimpleMathGrammar(MathGrammar):
         :param op:
         :return: operand precedence as int
         Raises:
-            ValueError: when given token `op` is not a operand.
+            ValueError: when given token `op` is not an operator.
         """
         if op.type != TokenKind.OP:
             raise ValueError(f'The op must be Token of operand type')
-
-        return cls.OPERANDS_TO_PRECEDENCE[op.value]
+        result = cls.OPERANDS_TO_PRECEDENCE[op.value]
+        return result
 
     @classmethod
     def get_operand_associativity(cls, op: Token) -> Associativity:
         if op.type != TokenKind.OP or op.value not in cls.OPERATOR_TO_ASSOCIATIVITY:
             raise ValueError(f'The op must be Token of operand type')
         return cls.OPERATOR_TO_ASSOCIATIVITY[op.value]
+
+    @classmethod
+    def get_operand_id_element(cls, op: Token):
+        if op.type != TokenKind.OP or op.value not in cls.OPERATOR_TO_ASSOCIATIVITY:
+            raise ValueError(f'The op must be Token of operand type')
+        return cls.OPERATOR_TO_IDENTITY_ELEMENT[op.value]
+
+    @classmethod
+    def get_operator_function(cls, op: Token):
+        if op.type != TokenKind.OP or op.value not in cls.OPERATOR_TO_ASSOCIATIVITY:
+            raise ValueError(f'The op must be Token of operand type')
+        return cls.OPERATOR_TO_FUNCTION[op.value]
 
     @classmethod
     def operands_comparator(cls, op1: Token, op2: Token) -> int:
@@ -238,8 +301,13 @@ class SimpleMathGrammar(MathGrammar):
         return cls.get_operands_precedence(op1) - cls.get_operands_precedence(op2)
 
     @classmethod
-    def token_to_operand(cls, token: Token) -> Operand2:
+    def token_to_operator(cls, token: Token) -> Operand2:
         if token.type != TokenKind.OP:
-            raise ValueError(f'The op must be Token of operand type but given {token}')
+            raise ValueError(f'The operand must be Token of `OPERATOR` type but given {token}')
 
-        return Operand2(token, cls)
+        priority = cls.get_operands_precedence(token)
+        associativity = cls.get_operand_associativity(token)
+        identity_element = cls.get_operand_id_element(token)
+        operand = cls.get_operator_function(token)
+
+        return Operand2(priority, associativity, identity_element, operand)
