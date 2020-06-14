@@ -37,8 +37,16 @@
    
    ![http://localhost:8888/lab](public/readme/jupyterlab-link-in-terminal.png "Jupyter Lab link in terminal example") 
    
-Additionally to add posibility show progres bar the jupyter require installation of additional plugin:
+Additionally to add possibility show progress bar the jupyter require installation of additional plugin:
 
 ```sh
 jupyter labextension install @jupyter-widgets/jupyterlab-manager
+```
+
+For Graph visualizations:
+```sh
+pip install ipycytoscape
+```
+```sh
+jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-cytoscape
 ```

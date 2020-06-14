@@ -1,0 +1,29 @@
+{
+   "nodes":[
+      {"data": {"id":"a"}},
+      {"data": {"id":"b"}},
+      {"data": {"id":"c"}},
+      {"data": {"id":"d"}},
+      {"data": {"id":"e"}},
+      {"data": {"id":"f"}},
+      {"data": {"id":"g"}},
+      {"data": {"id":"h"}},
+      {"data": {"id":"i"}}
+   ],
+   "edges":[
+      {"data":{"source":"a", "target":"b", "label": "3", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"a", "target":"d", "label": "4", "highlighted":  "#9dbaea"}},
+      {"data":{"source":"b", "target":"c", "label": "1", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"b", "target":"d", "label": "1", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"b", "target":"i", "label": "3", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"c", "target":"d", "label": "2", "highlighted":  "#9dbaea"}},
+      {"data":{"source":"c", "target":"f", "label": "5", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"c", "target":"i", "label": "2", "highlighted":  "#9dbaea"}},
+      {"data":{"source":"d", "target":"e", "label": "3", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"d", "target":"f", "label": "5", "highlighted":  "#9dbaea"}},
+      {"data":{"source":"f", "target":"g", "label": "4", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"f", "target":"h", "label": "2", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"g", "target":"h", "label": "3", "highlighted":  "#9dbaea"}},
+      {"data":{"source":"h", "target":"i", "label": "4", "highlighted":  "#9dbaea"}}
+   ]
+}
