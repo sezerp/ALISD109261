@@ -1,0 +1,23 @@
+{
+   "nodes":[
+      {"data": {"id":"a"}},
+      {"data": {"id":"b"}},
+      {"data": {"id":"c"}},
+      {"data": {"id":"d"}},
+      {"data": {"id":"e"}},
+      {"data": {"id":"f"}},
+      {"data": {"id":"g"}}
+   ],
+   "edges":[
+      {"data":{"source":"a", "target":"b", "label": "1", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"a", "target":"c", "label": "2", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"a", "target":"d", "label": "5", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"a", "target":"e", "label": "8", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"a", "target":"f", "label": "2", "highlighted":  "#f0ba18"}},
+      {"data":{"source":"b", "target":"c", "label": "3", "highlighted":  "#9dbaea"}},
+      {"data":{"source":"c", "target":"d", "label": "5", "highlighted":  "#9dbaea"}},
+      {"data":{"source":"d", "target":"e", "label": "7", "highlighted":  "#9dbaea"}},
+      {"data":{"source":"e", "target":"f", "label": "4", "highlighted":  "#9dbaea"}},
+      {"data":{"source":"f", "target":"g", "label": "3", "highlighted":  "#f0ba18"}}
+   ]
+}
